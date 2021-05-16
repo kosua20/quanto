@@ -58,6 +58,9 @@ public:
 			if(arg.key == "license-ext") {
 				licenseExt = true;
 			}
+			if(arg.key == "quant") {
+				bonus = true;
+			}
 			
 		}
 
@@ -90,7 +93,7 @@ public:
 	bool version = false;
 	bool license = false;
 	bool licenseExt = false;
-	
+	bool bonus = false;
 };
 
 
@@ -105,6 +108,9 @@ int main(int argc, char** argv){
 		return 0;
 	} else if(config.licenseExt){
 		Log::Info() << licenseExtMessage << std::endl;
+		return 0;
+	} else if(config.bonus){
+		Log::Info() << bonusMessage << std::endl;
 		return 0;
 	} else if(config.showHelp(config.inPath.empty())){
 		return 0;
