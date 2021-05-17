@@ -1,7 +1,7 @@
 #pragma once
 
-#include "system/Config.hpp"
-#include "Common.hpp"
+#include "core/system/Config.hpp"
+#include "core/Common.hpp"
 
 
 /**

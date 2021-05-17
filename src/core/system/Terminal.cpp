@@ -1,5 +1,5 @@
-#include "system/Terminal.hpp"
-#include "system/TextUtilities.hpp"
+#include "core/system/Terminal.hpp"
+#include "core/system/TextUtilities.hpp"
 
 #ifdef _WIN32
 #include <windows.h>

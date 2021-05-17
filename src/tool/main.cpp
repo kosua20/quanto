@@ -1,12 +1,12 @@
-#include "Common.hpp"
-#include "Strings.hpp"
-#include "Compressor.hpp"
+#include "core/Common.hpp"
+#include "core/Strings.hpp"
+#include "core/Compressor.hpp"
 
 
-#include "system/Config.hpp"
-#include "system/System.hpp"
-#include "system/TextUtilities.hpp"
-#include "system/Terminal.hpp"
+#include "core/system/Config.hpp"
+#include "core/system/System.hpp"
+#include "core/system/TextUtilities.hpp"
+#include "core/system/Terminal.hpp"
 
 class QuantizerConfig : public Config {
 public:

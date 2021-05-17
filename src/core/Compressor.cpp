@@ -1,4 +1,4 @@
-#include "Compressor.hpp"
+#include "core/Compressor.hpp"
 
 #include <imagequant/libimagequant.h>
 
@@ -8,7 +8,7 @@ extern "C" {
 #include <pngnq/pngnq.h>
 }
 
-#include "image/lodepng/lodepng.h"
+#include "libs/lodepng/lodepng.h"
 
 #include <cmath>
 #include <vector>

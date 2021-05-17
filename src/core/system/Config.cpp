@@ -1,6 +1,6 @@
-#include "system/Config.hpp"
-#include "system/TextUtilities.hpp"
-#include "system/System.hpp"
+#include "core/system/Config.hpp"
+#include "core/system/TextUtilities.hpp"
+#include "core/system/System.hpp"
 #include <sstream>
 
 KeyValues::KeyValues(const std::string & aKey) :

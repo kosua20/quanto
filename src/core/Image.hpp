@@ -1,4 +1,4 @@
-#include "Common.hpp"
+#include "core/Common.hpp"
 
 struct Image {
 public:
@@ -10,6 +10,8 @@ public:
 	bool load(const std::string& path);
 
 	bool save(const std::string& path);
+
+	bool convert(Image& src) const;
 	
 	void clean();
 

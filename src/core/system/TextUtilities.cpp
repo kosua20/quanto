@@ -1,4 +1,4 @@
-#include "system/TextUtilities.hpp"
+#include "core/system/TextUtilities.hpp"
 
 std::string TextUtilities::trim(const std::string & str, const std::string & del) {
 	const size_t firstNotDel = str.find_first_not_of(del);
@@ -34,6 +34,18 @@ std::string TextUtilities::parentDirectory(const std::string & str){
 		return "";
 	}
 	return str1.substr(0, lastSep1);
+}
+
+std::string TextUtilities::fileName(const std::string & str){
+	if(str.empty()){
+		return str;
+	}
+
+	const std::string::size_type lastSep = str.find_last_of("/\\");
+	if(lastSep == std::string::npos){
+		return str;
+	}
+	return str.substr(lastSep + 1);
 }
 
 void TextUtilities::replace(std::string & source, const std::string & fromString, const std::string & toString) {

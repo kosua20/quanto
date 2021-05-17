@@ -1,12 +1,12 @@
-#include "Image.hpp"
-#include "system/TextUtilities.hpp"
-#include "system/System.hpp"
+#include "core/Image.hpp"
+#include "core/system/TextUtilities.hpp"
+#include "core/system/System.hpp"
 
-#include "lodepng/lodepng.h"
-#include "lodepng/lodepng_util.h"
+#include "libs/lodepng/lodepng.h"
+#include "libs/lodepng/lodepng_util.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image/stb_image.h"
+#include "libs/stb_image/stb_image.h"
 
 
 bool Image::load(const std::string& path){
@@ -102,6 +102,7 @@ void Image::clean(){
 	w = 0;
 	h = 0;
 	size = 0;
+	_stbiAllocated = false;
 }
 
 void Image::makeOpaque(){
@@ -115,4 +116,12 @@ void Image::makeOpaque(){
 			data[4 * px + 3] = 255;
 		}
 	}
+}
+
+
+bool Image::convert(Image& dst) const {
+	dst.clean();
+	unsigned int res = lodepng_decode32(&dst.data, &dst.w, &dst.h, data, size);
+	dst.size = w * h * 4;
+	return res == 0;
 }

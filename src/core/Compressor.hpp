@@ -1,5 +1,5 @@
-#include "Common.hpp"
-#include "image/Image.hpp"
+#include "core/Common.hpp"
+#include "core/Image.hpp"
 
 enum class CompressorMode : int {
 	   IMAGEQUANT = 0,

@@ -1,5 +1,5 @@
 #pragma once
-#include "Common.hpp"
+#include "core/Common.hpp"
 
 /**
  \brief Provides utilities process strings.
@@ -25,7 +25,9 @@ public:
 	 \return the parent string
 	 */
 	static std::string parentDirectory(const std::string & str);
-	
+
+	static std::string fileName(const std::string & str);
+
 	/** Replace all occurences of a substring in a string by another string.
 	 \param source the string in which substitutions should happen
 	 \param fromString substring to replace
