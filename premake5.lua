@@ -1,13 +1,18 @@
+-- On Linux We have to query the dependencies of gtk+3 for sr_gui, we do this on the host for now.
+if os.ishost("linux") then
+	listing, code = os.outputof("pkg-config --libs libnotify gtk+-3.0")
+	liballLibs = string.explode(string.gsub(listing, "-l", ""), " ")
+end
 
 
 workspace("Quantizer")
+	
 	-- Configuration.
 	configurations({ "Release", "Dev"})
 	location("build")
 	targetdir ("build/%{prj.name}/%{cfg.longname}")
 	debugdir ("build/%{prj.name}/%{cfg.longname}")
 	architecture("x64")
-
 	systemversion("latest")
 
 	-- Configuration specific settings.
@@ -22,74 +27,97 @@ workspace("Quantizer")
 	filter({})
 	startproject("Quantizer")
 
-	project("imagequant")
-		kind("StaticLib")
-		
-		-- common files
-		files({"libs/imagequant/*.*" })
-		language("C")
-		
-		-- visual studio filters
-		filter("action:vs*")
-			defines({ "_CRT_SECURE_NO_WARNINGS" })    
+-- Projects
 
-		filter({})
+function CLibrarySetup(path)
+	
+	kind("StaticLib")
+	language("C")
 
-	project("posterizer")
-		kind("StaticLib")
-		
-		-- common files
-		files({"libs/posterizer/*.*" })
-		language("C")
-		
-		-- visual studio filters
-		filter("action:vs*")
-			defines({ "_CRT_SECURE_NO_WARNINGS" })    
+	files({ path })
 
-		filter({})
+	filter("action:vs*")
+			defines({ "_CRT_SECURE_NO_WARNINGS" }) 
+	filter({}) 
 
-	project("pngnq")
-		kind("StaticLib")
-		
-		-- common files
-		files({"libs/pngnq/*.*" })
-		language("C")
-		
-		-- visual studio filters
-		filter("action:vs*")
-			defines({ "_CRT_SECURE_NO_WARNINGS" })    
+end	
 
-		filter({})
+function CommonFlags()
+	kind("ConsoleApp")
+	language("C++")
+	cppdialect("C++17")
+	
+	-- Compiler flags
+	filter("toolset:not msc*")
+		buildoptions({ "-Wall", "-Wextra" })
+	filter("toolset:msc*")
+		buildoptions({ "-W3"})
+	filter({})
+
+	-- visual studio filters
+	filter("action:vs*")
+		defines({ "_CRT_SECURE_NO_WARNINGS" })  
+	filter({})
+
+end
 
 
-	project("Quantizer")
-		kind("ConsoleApp")
+group("Libs")
+	
+project("imagequant")
+	CLibrarySetup("libs/imagequant/*.*")
 
-		language("C++")
-		cppdialect("C++17")
-		
-		-- Compiler flags
-		filter("toolset:not msc*")
-			buildoptions({ "-Wall", "-Wextra" })
-		filter("toolset:msc*")
-			buildoptions({ "-W3"})
-		filter({})
-		-- Common include dirs
-		-- System headers are used to support angled brackets in Xcode.
-		includedirs({"src/"})
-		sysincludedirs({ "libs/" })
+project("posterizer")
+	CLibrarySetup("libs/posterizer/*.*")
 
-		-- common files
-		files({"src/**", "premake5.lua"})
-		removefiles({"**.DS_STORE", "**.thumbs"})
+project("pngnq")
+	CLibrarySetup("libs/pngnq/*.*")
 
-		links({"imagequant", "posterizer", "pngnq"})
-		
-		-- visual studio filters
-		filter("action:vs*")
-			defines({ "_CRT_SECURE_NO_WARNINGS" })  
-		filter({})
+-- Include sr_gui and GLFW premake files.
+include("libs/sr_gui/premake5.lua")
+include("libs/glfw/premake5.lua")
 
+group("Quantizer")
+
+project("QuantizerTool")
+	
+	CommonFlags()
+
+	includedirs({"src/"})
+	sysincludedirs({ "libs/" })
+
+	-- common files
+	files({"src/core/**", "src/libs/stb_image/**", "src/libs/lodepng/**", "src/tool/**", "premake5.lua"})
+	removefiles({"**.DS_STORE", "**.thumbs"})
+
+	links({"imagequant", "posterizer", "pngnq"})
+	
+
+
+project("QuantizerApp")
+	
+	CommonFlags()
+
+	includedirs({"src/"})
+	sysincludedirs({ "libs/", "libs/glfw/include/" })
+
+	-- common files
+	files({"src/core/**", "src/libs/**", "src/app/**", "premake5.lua"})
+	removefiles({"**.DS_STORE", "**.thumbs"})
+
+	links({"imagequant", "posterizer", "pngnq", "sr_gui", "glfw3"})
+
+	-- Libraries for each platform.
+	filter("system:macosx")
+		links({"OpenGL.framework", "Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "AppKit.framework"})
+
+	filter("system:windows")
+		links({"opengl32", "User32", "Comdlg32", "Comctl32", "runtimeobject"})
+
+	filter("system:linux")
+		links({"GL", "X11", "Xi", "Xrandr", "Xxf86vm", "Xinerama", "Xcursor", "Xext", "Xrender", "Xfixes", "xcb", "Xau", "Xdmcp", "rt", "m", "pthread", "dl", liballLibs})
+	
+	filter({})
 
 
 newaction {
