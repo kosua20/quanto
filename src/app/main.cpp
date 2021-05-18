@@ -14,6 +14,24 @@
 #include "libs/imgui/imgui_impl_glfw.h"
 #include "libs/imgui/imgui_impl_opengl3.h"
 
+#include "font_data.h"
+
+
+struct State {
+	std::string inPath;
+	bool shouldLoad = false;
+};
+
+State state;
+
+void dropCallback(GLFWwindow* , int count, const char** paths){
+	if(count > 0){
+		state.shouldLoad = true;
+		state.inPath = std::string(paths[0]);
+	}
+}
+
+
 GLFWwindow* createWindow(int w, int h) {
 
 	// Initialize glfw, which will create and setup an OpenGL context.
@@ -25,7 +43,14 @@ GLFWwindow* createWindow(int w, int h) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = glfwCreateWindow(w, h, "Quantizer", NULL, NULL);
+	glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+	glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+	glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
+	const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	const unsigned int ww = std::max( mode->width/2, w);
+	const unsigned int hh = std::max( mode->height/2, h);
+
+	GLFWwindow* window = glfwCreateWindow(ww, hh, "Quantizer", NULL, NULL);
 
 	if(!window) {
 		glfwTerminate();
@@ -44,8 +69,20 @@ GLFWwindow* createWindow(int w, int h) {
 	glfwSwapInterval(1);
 
 	ImGui::CreateContext();
+
+	ImFontConfig font = ImFontConfig();
+	font.FontData = (void*)(fontData);
+	font.FontDataSize = size_fontData;
+	font.SizePixels = 15.0f;
+	// Font data is static
+	font.FontDataOwnedByAtlas = false;
+	ImGuiIO & io = ImGui::GetIO();
+	io.Fonts->AddFont(&font);
+
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
+
+	ImGui::StyleColorsDark();
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.WindowPadding = ImVec2(8,8);
 	style.FramePadding = ImVec2(10,4);
@@ -87,6 +124,8 @@ GLFWwindow* createWindow(int w, int h) {
 	colors[ImGuiCol_TextSelectedBg]         = ImVec4(0.04f, 0.26f, 0.31f, 1.00f);
 	colors[ImGuiCol_NavHighlight]           = ImVec4(0.05f, 0.61f, 0.73f, 1.00f);
 
+	glfwSetDropCallback(window, dropCallback);
+
 	return window;
 }
 
@@ -113,6 +152,7 @@ void upload(Image& img, GLuint tex){
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+
 int main(int, char** ){
 	
 	GLFWwindow* window = createWindow(800,600);
@@ -124,7 +164,6 @@ int main(int, char** ){
 
 	sr_gui_init();
 
-	std::string inPath;
 	std::string inName;
 	Image refImg;
 	Image outImg;
@@ -138,7 +177,7 @@ int main(int, char** ){
 	int winW, winH;
 
 	const int toolbarBaseWidth = 780;
-	const int toolbarBaseHeight = 20+40;
+	const int toolbarBaseHeight = 30+40;
 
 
 	float pixelScale = 1.f;
@@ -163,7 +202,6 @@ int main(int, char** ){
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		bool dirty = false;
-		bool loaded = false;
 
 		const bool splitToolbar = winW < toolbarBaseWidth;
 		const int toolbarFinalHeight = toolbarBaseHeight + (splitToolbar ? 40 : 0);
@@ -178,34 +216,8 @@ int main(int, char** ){
 				int count = 0;
 
 				if(sr_gui_ask_load_files("Select an image", "", "", &outPaths, &count) == SR_GUI_VALIDATED && count > 0){
-					inPath = std::string(outPaths[0]);
-					Image tmpImg;
-					if(tmpImg.load(inPath)){
-						refImg.clean();
-						refImg = tmpImg;
-						dirty = true;
-						loaded = true;
-
-						if(refTexId > 0){
-							glDeleteTextures(1, &refTexId);
-						}
-						refTexId = setupTexture(refImg.w, refImg.h);
-						upload(refImg, refTexId);
-
-						// Prepare output.
-						if(outTexId > 0){
-							glDeleteTextures(1, &outTexId);
-						}
-						outTexId = setupTexture(refImg.w, refImg.h);
-						inName = TextUtilities::fileName(inPath);
-					} else {
-						sr_gui_show_message("Quantizer", "Unable to load image", SR_GUI_MESSAGE_LEVEL_ERROR);
-					}
-
-					for(int i = 0; i < count; ++i){
-						free(outPaths[i]);
-					}
-					free(outPaths);
+					state.shouldLoad = true;
+					state.inPath = std::string(outPaths[0]);
 				}
 			}
 
@@ -262,11 +274,45 @@ int main(int, char** ){
 			ImGui::SameLine();
 			ImGui::TextDisabled( "(?)" );
 			if( ImGui::IsItemHovered() ) {
-				ImGui::SetTooltip( "Blablabla" );
+				ImGui::SetTooltip( "Quantizer - © Simon Rodriguez 2021\nScroll/Pan to move around\nShift+scroll to zoom faster\nDrag & drop images\nHold \"Show original\" to compare" );
 			}
 
 		}
 		ImGui::End();
+
+		// Load if needed.
+		bool justLoaded = false;
+
+		if(state.shouldLoad){
+			state.shouldLoad = false;
+
+			Image tmpImg;
+			if(tmpImg.load(state.inPath)){
+				refImg.clean();
+				refImg = tmpImg;
+				dirty = true;
+				justLoaded = true;
+
+				if(refTexId > 0){
+					glDeleteTextures(1, &refTexId);
+				}
+				refTexId = setupTexture(refImg.w, refImg.h);
+				upload(refImg, refTexId);
+
+				// Prepare output.
+				if(outTexId > 0){
+					glDeleteTextures(1, &outTexId);
+				}
+				outTexId = setupTexture(refImg.w, refImg.h);
+				inName = TextUtilities::fileName(state.inPath);
+				// Reset zoom.
+				mouseShift = ImVec2(0.0f, 0.0f);
+				mousePrev = ImVec2(0.0f, 0.0f);
+
+			} else {
+				sr_gui_show_message("Quantizer", "Unable to load image", SR_GUI_MESSAGE_LEVEL_ERROR);
+			}
+		}
 
 		// Perform compression and update preview texture.
 		if(dirty && refImg.data){
@@ -301,11 +347,6 @@ int main(int, char** ){
 			tmpImg.clean();
 		}
 
-		if(loaded){
-			mouseShift = ImVec2(0.0f, 0.0f);
-			mousePrev = ImVec2(0.0f, 0.0f);
-		}
-
 		// Display current texture.
 		ImGui::SetNextWindowPos(ImVec2(0.f, 0.f));
 		ImGui::SetNextWindowSize(ImVec2(float(winW), float(winH - toolbarFinalHeight)));
@@ -315,7 +356,7 @@ int main(int, char** ){
 			const ImVec2 winSize = ImGui::GetContentRegionAvail();
 			const ImVec2 imageSize(float(refImg.w), float(refImg.h));
 
-			if(loaded){
+			if(justLoaded){
 				pixelScale = 1.5f * std::max( imageSize[0] / winSize[0], imageSize[1] / winSize[1]);
 			}
 
@@ -338,7 +379,8 @@ int main(int, char** ){
 			ImGui::Image(reinterpret_cast<void *>(textureId), winSize, uv0, uv1);
 
 			if(ImGui::IsItemHovered()){
-				pixelScale += 0.01f * ImGui::GetIO().MouseWheel;
+				const float scaleFactor = 0.01f * (ImGui::GetIO().KeyShift ? 10.0f : 1.0f);
+				pixelScale += scaleFactor * ImGui::GetIO().MouseWheel;
 				pixelScale = std::min(std::max(pixelScale, 0.001f), 1000.0f);
 
 				if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
