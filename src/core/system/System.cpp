@@ -7,6 +7,7 @@
 #else
 #include <unistd.h>
 #endif
+#include <iomanip>
 
 #ifdef _WIN32
 
@@ -94,9 +95,9 @@ std::string System::timestamp(){
 }
 
 size_t System::getFileSize(const std::string& path){
-	const auto pathW = widen(path);
+	const auto pathW = (path);
 
-	FILE* file = fopen(pathW.c_str(), "rb");
+	FILE* file = fopen( pathW.c_str(), "rb" );
 	if(!file) {
 		return 0;
 	}

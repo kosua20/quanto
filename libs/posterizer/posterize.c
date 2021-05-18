@@ -20,8 +20,10 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
+#ifndef _WIN32
 #include <unistd.h>
 #include <getopt.h>
+#endif
 //#include "png.h"
 
 void optimizeForAverageFilter(
@@ -67,8 +69,8 @@ static void pal_init(palette *pal) {
 }
 
 static void interpolate_palette_front(const palette *pal, unsigned int mapping[], const bool dither);
-static void voronoi(const hist_entry histogram[static 256], palette *pal);
-static double palette_error(const hist_entry histogram[static 256], const palette *palette_orig);
+static void voronoi(const hist_entry histogram[256], palette *pal);
+static double palette_error(const hist_entry histogram[256], const palette *palette_orig);
 static void interpolate_palette_back(const palette *pal, unsigned int mapping[]);
 
 static void posterize(png24_image_shim *img, unsigned int maxlevels, const double maxerror, bool dither, bool verbose);
@@ -124,7 +126,7 @@ inline static unsigned int index_from_weights(hist_entry weight, hist_entry sum)
 
 // average values in a "box" proportionally to frequency of their occurence
 // returns linear value (which is a mix of color and alpha components, so can't be gamma-corrected later)
-static double weighted_avg_linear(const unsigned int start, const unsigned int end, const hist_entry histogram[static 256])
+static double weighted_avg_linear(const unsigned int start, const unsigned int end, const hist_entry histogram[256])
 {
     double weight=0,sum=0;
     for(unsigned int val=start; val < end; val++) {
@@ -135,7 +137,7 @@ static double weighted_avg_linear(const unsigned int start, const unsigned int e
 }
 
 // returns integer index that from weighed average and applies gamma correction proportionally to amount of color
-static unsigned int weighted_avg_int(const unsigned int start, const unsigned int end, const hist_entry histogram[static 256])
+static unsigned int weighted_avg_int(const unsigned int start, const unsigned int end, const hist_entry histogram[256])
 {
     hist_entry weight = {0};
     hist_entry sum = {0};
@@ -151,7 +153,7 @@ static unsigned int weighted_avg_int(const unsigned int start, const unsigned in
 }
 
 // variance (AKA second moment) of the box. Measures how much "spread" the values are
-static double variance_in_range(const unsigned int start, const unsigned int end, const hist_entry histogram[static 256])
+static double variance_in_range(const unsigned int start, const unsigned int end, const hist_entry histogram[256])
 {
     const double avg = weighted_avg_linear(start, end, histogram);
 
@@ -165,13 +167,13 @@ static double variance_in_range(const unsigned int start, const unsigned int end
     return sum;
 }
 
-static double variance(const struct box box, const hist_entry histogram[static 256])
+static double variance(const struct box box, const hist_entry histogram[256])
 {
     return variance_in_range(box.start, box.end, histogram);
 }
 
 // Square error. Estimates how well palette "fits" the histogram.
-static double palette_error(const hist_entry histogram[static 256], const palette *pal)
+static double palette_error(const hist_entry histogram[256], const palette *pal)
 {
     unsigned int mapping[256];
 
@@ -191,7 +193,7 @@ static double palette_error(const hist_entry histogram[static 256], const palett
 
 // converts boxes to palette.
 // palette here is a sparse array where elem[x]=x is taken, elem[x]=0 is free (except x=0)
-static void palette_from_boxes(const struct box boxes[], const int numboxes, const hist_entry histogram[static 256], palette *pal)
+static void palette_from_boxes(const struct box boxes[], const int numboxes, const hist_entry histogram[256], palette *pal)
 {
     pal_init(pal);
 
@@ -205,7 +207,7 @@ static void palette_from_boxes(const struct box boxes[], const int numboxes, con
 /*
  1-dimensional median cut, using variance for "largest" box
 */
-static unsigned int reduce(const unsigned int maxlevels, const double maxerror, const hist_entry histogram[static 256], palette *pal)
+static unsigned int reduce(const unsigned int maxlevels, const double maxerror, const hist_entry histogram[256], palette *pal)
 {
     unsigned int numboxes=1;
     struct box boxes[256];
@@ -317,7 +319,7 @@ static void remap(png24_image_shim *img, const palette *pal, bool dither)
 }
 
 // it doesn't count unique colors, only intensity values of all channels
-static void intensity_histogram(const png24_image_shim *img, hist_entry histogram[static 256])
+static void intensity_histogram(const png24_image_shim *img, hist_entry histogram[256])
 {
 	const unsigned int imgHeight = img->height;
 	const unsigned int imageWidth = img->width;
@@ -402,7 +404,7 @@ static void usage(const char *exepath)
 
 // performs voronoi iteration (mapping histogram to palette and creating new palette from remapped values)
 // this shifts palette towards local optimum
-static void voronoi(const hist_entry histogram[static 256], palette *pal)
+static void voronoi(const hist_entry histogram[256], palette *pal)
 {
     unsigned int mapping[256];
 
@@ -452,12 +454,12 @@ static unsigned int mse_to_quality(double mse)
     return 0;
 }
 
-#include <unistd.h>
 
-#if defined(WIN32) || defined(__WIN32__)
+#if defined(WIN32) || defined(__WIN32__) || defined(_WIN32)
 #include <fcntl.h>
 #include <io.h>
 #else
+#include <unistd.h>
 #define setmode(what,ever)
 #endif
 

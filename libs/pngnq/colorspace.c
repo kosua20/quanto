@@ -1,8 +1,10 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include <unistd.h>
 #include <stdio.h>
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 
 #include "colorspace.h"
 

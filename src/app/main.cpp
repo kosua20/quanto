@@ -7,12 +7,12 @@
 #include "core/system/System.hpp"
 #include "core/system/TextUtilities.hpp"
 
-#include "gl3w.h"
+#include "libs/gl3w/gl3w.h"
 #include <GLFW/glfw3.h>
 #include <sr_gui/sr_gui.h>
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include "libs/imgui/imgui.h"
+#include "libs/imgui/imgui_impl_glfw.h"
+#include "libs/imgui/imgui_impl_opengl3.h"
 
 GLFWwindow* createWindow(int w, int h) {
 
@@ -168,8 +168,8 @@ int main(int, char** ){
 		const bool splitToolbar = winW < toolbarBaseWidth;
 		const int toolbarFinalHeight = toolbarBaseHeight + (splitToolbar ? 40 : 0);
 
-		ImGui::SetNextWindowPos( ImVec2(0, winH - toolbarFinalHeight) );
-		ImGui::SetNextWindowSize( ImVec2(winW, toolbarFinalHeight) );
+		ImGui::SetNextWindowPos( ImVec2(0.f, float(winH - toolbarFinalHeight)) );
+		ImGui::SetNextWindowSize( ImVec2(float(winW), float(toolbarFinalHeight)) );
 
 		if(ImGui::Begin("Options", nullptr, winFlags)){
 
@@ -213,10 +213,14 @@ int main(int, char** ){
 			if(ImGui::Button("Save...")){
 				char* outPathTmp = nullptr;
 				if(sr_gui_ask_save_file("Save to file", "", "png", &outPathTmp) == SR_GUI_VALIDATED){
+					std::string outPath( outPathTmp );
+					free( outPathTmp );
+					if( !TextUtilities::hasSuffix( outPath, ".png" ) ) {
+						outPath.append( ".png" );
+					}
 					if(!outImg.save(std::string(outPathTmp))){
 						sr_gui_show_message("Quantizer", "Unable to save image", SR_GUI_MESSAGE_LEVEL_ERROR);
 					}
-					free(outPathTmp);
 				}
 			}
 			ImGui::SameLine();
@@ -251,9 +255,14 @@ int main(int, char** ){
 			const int percentage = (int)std::round((1.f - float(outImg.size) / float(refImg.size)) * 100.0f);
 
 			if(refImg.data == nullptr){
-				ImGui::TextDisabled("No image loaded.");
+				ImGui::Text("No image loaded.");
 			} else {
-				ImGui::TextDisabled("%s (%ux%u) - %zu bytes (saved %d%% of %zu bytes)", inName.c_str(), refImg.w, refImg.h, outImg.size, percentage, refImg.size);
+				ImGui::Text("%s (%ux%u) - %zu bytes (saved %d%% of %zu bytes)", inName.c_str(), refImg.w, refImg.h, outImg.size, percentage, refImg.size);
+			}
+			ImGui::SameLine();
+			ImGui::TextDisabled( "(?)" );
+			if( ImGui::IsItemHovered() ) {
+				ImGui::SetTooltip( "Blablabla" );
 			}
 
 		}
@@ -298,13 +307,13 @@ int main(int, char** ){
 		}
 
 		// Display current texture.
-		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::SetNextWindowSize(ImVec2(winW, winH - toolbarFinalHeight));
+		ImGui::SetNextWindowPos(ImVec2(0.f, 0.f));
+		ImGui::SetNextWindowSize(ImVec2(float(winW), float(winH - toolbarFinalHeight)));
 		if(ImGui::Begin("Image", nullptr, winFlags) && ( refImg.data != nullptr) ){
 
 
 			const ImVec2 winSize = ImGui::GetContentRegionAvail();
-			const ImVec2 imageSize(refImg.w, refImg.h);
+			const ImVec2 imageSize(float(refImg.w), float(refImg.h));
 
 			if(loaded){
 				pixelScale = 1.5f * std::max( imageSize[0] / winSize[0], imageSize[1] / winSize[1]);

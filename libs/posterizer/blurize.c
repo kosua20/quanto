@@ -21,7 +21,9 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 //#include "png.h"
 
 typedef struct {
@@ -46,12 +48,15 @@ void optimizeForAverageFilter(
     const int errorRowCount = 3;
     const int ditheringPrecision = 256;
     int stride = width * bytesPerPixel;
-    colorDelta row0[width + filterWidth - 1], row1[width + filterWidth - 1], row2[width + filterWidth - 1];
+    const int sizeRow = width + filterWidth - 1;
+    colorDelta* row0 = (colorDelta*) malloc( sizeRow * sizeof( colorDelta ) );
+    colorDelta* row1 = (colorDelta*) malloc( sizeRow * sizeof( colorDelta ) );
+    colorDelta* row2 = (colorDelta*) malloc( sizeRow * sizeof( colorDelta ) );
     colorDelta *colorError[3] = { row0, row1, row2 }, *colorTemp;
 
-    memset(row0, 0, sizeof(row0));
-    memset(row1, 0, sizeof(row1));
-    memset(row2, 0, sizeof(row2));
+    memset(row0, 0, sizeRow * sizeof( colorDelta ));
+    memset(row1, 0, sizeRow * sizeof( colorDelta ));
+    memset(row2, 0, sizeRow * sizeof( colorDelta ));
 
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++) {
@@ -89,6 +94,10 @@ void optimizeForAverageFilter(
         }
         colorError[0] = colorTemp;
     }
+
+    free( row0 );
+    free( row1 );
+    free( row2 );
 }
 
 static void diffuseColorDeltas(colorDelta **colorError, int x, int *delta) {
