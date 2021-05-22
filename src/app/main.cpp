@@ -154,8 +154,11 @@ void upload(Image& img, GLuint tex){
 
 
 int main(int, char** ){
-	
-	GLFWwindow* window = createWindow(800,600);
+
+	const int toolbarBaseWidth = 822;
+	const int toolbarBaseHeight = 30+40;
+
+	GLFWwindow* window = createWindow(830, 620);
 
 	if(!window){
 		Log::Error() << "Unable to create window." << std::endl;
@@ -176,14 +179,9 @@ int main(int, char** ){
 
 	int winW, winH;
 
-	const int toolbarBaseWidth = 780;
-	const int toolbarBaseHeight = 30+40;
-
-
 	float pixelScale = 1.f;
 	ImVec2 mouseShift(0.f, 0.f);
 	ImVec2 mousePrev(0.f, 0.f);
-
 
 	const unsigned int winFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar;
 
@@ -202,6 +200,7 @@ int main(int, char** ){
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		bool dirty = false;
+		bool resetScale = false;
 
 		const bool splitToolbar = winW < toolbarBaseWidth;
 		const int toolbarFinalHeight = toolbarBaseHeight + (splitToolbar ? 40 : 0);
@@ -242,12 +241,20 @@ int main(int, char** ){
 
 			ImGui::SameLine();
 
-			ImGui::PushItemWidth(110);
-			dirty = ImGui::Combo("Mode", reinterpret_cast<int*>(&settings.mode), "ImageQuant\0PngNeuQuant\0Posterizer\0") || dirty;
+			if(ImGui::Button("Reset position")){
+				mousePrev = ImVec2(0,0);
+				mouseShift = ImVec2(0,0);
+				resetScale = true;
+			}
 
 			if(!splitToolbar){
 				ImGui::SameLine();
 			}
+
+			ImGui::PushItemWidth(110);
+			dirty = ImGui::Combo("Mode", reinterpret_cast<int*>(&settings.mode), "ImageQuant\0PngNeuQuant\0Posterizer\0") || dirty;
+
+			ImGui::SameLine();
 
 			int colorCount = (int)settings.colorCount;
 			if(ImGui::SliderInt("Colors", &colorCount, 2, 256, "%d", ImGuiSliderFlags_AlwaysClamp)){
@@ -281,8 +288,6 @@ int main(int, char** ){
 		ImGui::End();
 
 		// Load if needed.
-		bool justLoaded = false;
-
 		if(state.shouldLoad){
 			state.shouldLoad = false;
 
@@ -291,7 +296,7 @@ int main(int, char** ){
 				refImg.clean();
 				refImg = tmpImg;
 				dirty = true;
-				justLoaded = true;
+				resetScale = true;
 
 				if(refTexId > 0){
 					glDeleteTextures(1, &refTexId);
@@ -308,6 +313,7 @@ int main(int, char** ){
 				// Reset zoom.
 				mouseShift = ImVec2(0.0f, 0.0f);
 				mousePrev = ImVec2(0.0f, 0.0f);
+				pixelScale = 1.f;
 
 			} else {
 				sr_gui_show_message("Quantizer", "Unable to load image", SR_GUI_MESSAGE_LEVEL_ERROR);
@@ -356,7 +362,7 @@ int main(int, char** ){
 			const ImVec2 winSize = ImGui::GetContentRegionAvail();
 			const ImVec2 imageSize(float(refImg.w), float(refImg.h));
 
-			if(justLoaded){
+			if(resetScale){
 				pixelScale = 1.5f * std::max( imageSize[0] / winSize[0], imageSize[1] / winSize[1]);
 			}
 
