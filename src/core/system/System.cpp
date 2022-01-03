@@ -8,6 +8,7 @@
 #include <unistd.h>
 #endif
 #include <iomanip>
+#include <climits>
 
 #ifdef _WIN32
 

@@ -16,6 +16,7 @@
 
 #include "font_data.h"
 
+#include <cstring>
 
 struct State {
 	std::string inPath;
