@@ -1,8 +1,8 @@
 #pragma once
 
-const std::string versionMessage = "Quantizer version 2.0";
+const std::string versionMessage = "Quanto version 2.1";
 
-const std::string licenseMessage = "The Quantizer is licensed under the GPLv3 license.\n"
+const std::string licenseMessage = "Quanto is licensed under the GPLv3 license.\n"
 " \n"
 "It uses the following external projects for image loading and PNG quantization: LodePNG, stb_image, Median Cut Posterizer, pngnq, NeuQuant, libimagequant. Please use the '--license-ext' flag to display their respective licenses.\n"
 " \n"

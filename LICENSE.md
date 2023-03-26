@@ -1,4 +1,4 @@
-The Quantizer is licensed under the GPLv3 license.
+Quanto is licensed under the GPLv3 license.
 
 It uses the following external projects for image loading and PNG quantization : LodePNG, stb_image, Median Cut Posterizer, pngnq, NeuQuant, libimagequant. Please see `LICENSE_EXTERNAL.md` for their respective licenses.
 

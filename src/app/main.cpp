@@ -51,7 +51,7 @@ GLFWwindow* createWindow(int w, int h) {
 	const unsigned int ww = std::max( mode->width/2, w);
 	const unsigned int hh = std::max( mode->height/2, h);
 
-	GLFWwindow* window = glfwCreateWindow(ww, hh, "Quantizer", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(ww, hh, "Quanto", NULL, NULL);
 
 	if(!window) {
 		glfwTerminate();
@@ -231,7 +231,7 @@ int main(int, char** ){
 						outPath.append( ".png" );
 					}
 					if(!outImg.save(std::string(outPathTmp))){
-						sr_gui_show_message("Quantizer", "Unable to save image", SR_GUI_MESSAGE_LEVEL_ERROR);
+						sr_gui_show_message("Quanto", "Unable to save image", SR_GUI_MESSAGE_LEVEL_ERROR);
 					}
 				}
 			}
@@ -282,7 +282,7 @@ int main(int, char** ){
 			ImGui::SameLine();
 			ImGui::TextDisabled( "(?)" );
 			if( ImGui::IsItemHovered() ) {
-				ImGui::SetTooltip( "Quantizer - © Simon Rodriguez 2021\nScroll/Pan to move around\nShift+scroll to zoom faster\nDrag & drop images\nHold \"Show original\" to compare" );
+				ImGui::SetTooltip( "Quanto - © Simon Rodriguez 2023\nScroll/Pan to move around\nShift+scroll to zoom faster\nDrag & drop images\nHold \"Show original\" to compare" );
 			}
 
 		}
@@ -317,7 +317,7 @@ int main(int, char** ){
 				pixelScale = 1.f;
 
 			} else {
-				sr_gui_show_message("Quantizer", "Unable to load image", SR_GUI_MESSAGE_LEVEL_ERROR);
+				sr_gui_show_message("Quanto", "Unable to load image", SR_GUI_MESSAGE_LEVEL_ERROR);
 			}
 		}
 
@@ -348,7 +348,7 @@ int main(int, char** ){
 				dispImg.clean();
 
 			} else {
-				sr_gui_show_message("Quantizer", "Unable to quantize image", SR_GUI_MESSAGE_LEVEL_ERROR);
+				sr_gui_show_message("Quanto", "Unable to quantize image", SR_GUI_MESSAGE_LEVEL_ERROR);
 			}
 
 			tmpImg.clean();

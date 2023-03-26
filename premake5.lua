@@ -5,7 +5,7 @@ if os.ishost("linux") then
 end
 
 
-workspace("Quantizer")
+workspace("Quanto")
 	
 	-- Configuration.
 	configurations({ "Release", "Dev"})
@@ -25,7 +25,7 @@ workspace("Quantizer")
 		symbols("On")
 
 	filter({})
-	startproject("Quantizer")
+	startproject("Quanto")
 
 -- Projects
 
@@ -77,9 +77,9 @@ project("pngnq")
 include("libs/sr_gui/premake5.lua")
 include("libs/glfw/premake5.lua")
 
-group("Quantizer")
+group("Quanto")
 
-project("QuantizerTool")
+project("QuantoTool")
 	
 	CommonFlags()
 
@@ -94,7 +94,7 @@ project("QuantizerTool")
 	
 
 
-project("QuantizerApp")
+project("Quanto")
 	
 	CommonFlags()
 
@@ -105,6 +105,12 @@ project("QuantizerApp")
 	files({"src/core/**", "src/libs/**", "src/app/**", "premake5.lua"})
 	removefiles({"**.DS_STORE", "**.thumbs"})
 
+	-- per platform files
+	filter("system:windows")
+		files({"resources/windows/*"})
+
+	filter({})
+	
 	links({"imagequant", "posterizer", "pngnq", "sr_gui", "glfw3"})
 
 	-- Libraries for each platform.

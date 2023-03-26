@@ -8,10 +8,10 @@
 #include "core/system/TextUtilities.hpp"
 #include "core/system/Terminal.hpp"
 
-class QuantizerConfig : public Config {
+class QuantoConfig : public Config {
 public:
 	
-	explicit QuantizerConfig(const std::vector<std::string> & argv) : Config(argv) {
+	explicit QuantoConfig(const std::vector<std::string> & argv) : Config(argv) {
 		
 		// Process arguments.
 		for(const auto & arg : arguments()) {
@@ -54,7 +54,7 @@ public:
 			if(arg.key == "license-ext") {
 				licenseExt = true;
 			}
-			if(arg.key == "quant") {
+			if(arg.key == "coucou") {
 				bonus = true;
 			}
 			
@@ -71,7 +71,7 @@ public:
 		registerArgument("no-alpha", "na", "Remove alpha channel");
 
 		registerSection("Infos");
-		registerArgument("version", "v", "Displays the current Quantizer version.");
+		registerArgument("version", "v", "Displays the current Quanto version.");
 		registerArgument("license", "", "Display the license message.");
 		registerArgument("license-ext", "", "Display the dependencies license messages.");
 		
@@ -95,7 +95,7 @@ public:
 
 int main(int argc, char** argv){
 	
-	QuantizerConfig config(std::vector<std::string>(argv, argv+argc));
+	QuantoConfig config(std::vector<std::string>(argv, argv+argc));
 	if(config.version){
 		Log::Info() << versionMessage << std::endl;
 		return 0;
