@@ -43,7 +43,6 @@ function CLibrarySetup(path)
 end	
 
 function CommonFlags()
-	kind("ConsoleApp")
 	language("C++")
 	cppdialect("C++17")
 	
@@ -81,6 +80,7 @@ group("Quanto")
 
 project("QuantoTool")
 	
+	kind("ConsoleApp")
 	CommonFlags()
 
 	includedirs({"src/"})
@@ -96,6 +96,7 @@ project("QuantoTool")
 
 project("Quanto")
 	
+	kind("WindowedApp")
 	CommonFlags()
 
 	includedirs({"src/"})
@@ -106,10 +107,13 @@ project("Quanto")
 	removefiles({"**.DS_STORE", "**.thumbs"})
 
 	-- per platform files
-	filter("system:windows")
+	filter("action:vs*")
 		files({"resources/windows/*"})
 
-	filter({})
+	filter("action:xcode*")
+		files({"resources/macos/*"})
+		
+   filter({})
 	
 	links({"imagequant", "posterizer", "pngnq", "sr_gui", "glfw3"})
 
