@@ -18,6 +18,11 @@
 
 #include <cstring>
 
+#ifdef _WIN32
+// Avoid command prompt appearing on startup
+#pragma comment(linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"")
+#endif
+
 struct State {
 	std::string inPath;
 	bool shouldLoad = false;
