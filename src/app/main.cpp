@@ -224,6 +224,13 @@ int main(int, char** ){
 					state.shouldLoad = true;
 					state.inPath = std::string(outPaths[0]);
 				}
+
+				if(outPaths){
+					for(uint i = 0u; i < count; ++i){
+						free(outPaths[i]);
+					}
+					free(outPaths);
+				}
 			}
 
 			ImGui::SameLine();
@@ -231,13 +238,15 @@ int main(int, char** ){
 				char* outPathTmp = nullptr;
 				if(sr_gui_ask_save_file("Save to file", "", "png", &outPathTmp) == SR_GUI_VALIDATED){
 					std::string outPath( outPathTmp );
-					free( outPathTmp );
 					if( !TextUtilities::hasSuffix( outPath, ".png" ) ) {
 						outPath.append( ".png" );
 					}
 					if(!outImg.save(std::string(outPathTmp))){
 						sr_gui_show_message("Quanto", "Unable to save image", SR_GUI_MESSAGE_LEVEL_ERROR);
 					}
+				}
+				if(outPathTmp){
+					free(outPathTmp);
 				}
 			}
 			ImGui::SameLine();
