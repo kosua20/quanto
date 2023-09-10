@@ -217,19 +217,13 @@ int main(int, char** ){
 		if(ImGui::Begin("Options", nullptr, winFlags)){
 
 			if(ImGui::Button("Load...")){
-				char** outPaths = nullptr;
-				int count = 0;
-
-				if(sr_gui_ask_load_files("Select an image", "", "", &outPaths, &count) == SR_GUI_VALIDATED && count > 0){
+				char* outPath = nullptr;
+				if(sr_gui_ask_load_file("Select an image", "", "", &outPath) == SR_GUI_VALIDATED){
 					state.shouldLoad = true;
-					state.inPath = std::string(outPaths[0]);
+					state.inPath = std::string(outPath);
 				}
-
-				if(outPaths){
-					for(uint i = 0u; i < count; ++i){
-						free(outPaths[i]);
-					}
-					free(outPaths);
+				if(outPath){
+					free(outPath);
 				}
 			}
 
@@ -295,8 +289,11 @@ int main(int, char** ){
 			}
 			ImGui::SameLine();
 			ImGui::TextDisabled( "(?)" );
-			if( ImGui::IsItemHovered() ) {
+			if(ImGui::IsItemHovered()) {
 				ImGui::SetTooltip( "Quanto - © Simon Rodriguez 2023\nScroll/Pan to move around\nShift+scroll to zoom faster\nDrag & drop images\nHold \"Show original\" to compare" );
+			}
+			if(ImGui::IsItemClicked()){
+				sr_gui_open_in_browser("https://github.com/kosua20/Quanto");
 			}
 
 		}
