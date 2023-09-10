@@ -15,6 +15,10 @@ workspace("Quanto")
 	architecture("x64")
 	systemversion("latest")
 
+	filter("system:macosx")
+		systemversion("10.12:latest")
+	filter({})
+
 	-- Configuration specific settings.
 	filter("configurations:Release")
 		defines({ "NDEBUG" })
@@ -84,7 +88,7 @@ project("QuantoTool")
 	CommonFlags()
 
 	includedirs({"src/"})
-	sysincludedirs({ "libs/" })
+	externalincludedirs({ "libs/" })
 
 	-- common files
 	files({"src/core/**", "src/libs/stb_image/**", "src/libs/lodepng/**", "src/tool/**", "premake5.lua"})
@@ -100,7 +104,7 @@ project("Quanto")
 	CommonFlags()
 
 	includedirs({"src/"})
-	sysincludedirs({ "libs/", "libs/glfw/include/" })
+	externalincludedirs({ "libs/", "libs/glfw/include/" })
 
 	-- common files
 	files({"src/core/**", "src/libs/**", "src/app/**", "premake5.lua"})
